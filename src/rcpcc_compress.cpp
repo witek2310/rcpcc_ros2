@@ -49,7 +49,7 @@ public:
     std::string folder_path;
     this->get_parameter("csv_folder_path", folder_path);
 
-    csv_file_path_ = folder_path + "/compress.csv";
+    csv_file_path_ = folder_path + "/rcpcc_compress.csv";
 
     publisher_point_cloud_ = this->create_publisher<rcpcc::msg::CompressedPointCloud>("compressed_pointcloud_rcpcc", 10);
     
@@ -67,7 +67,7 @@ public:
       std::filesystem::create_directories(std::filesystem::path(csv_file_path_).parent_path()); 
       std::ofstream file(csv_file_path_);
       if (file.is_open()) {
-        file << "points_number, compresion_time, size_after_compresion[B]\n";  // Header row
+        file << "time_stamp, points_number, compresion_time, size_after_compresion[B]\n";  // Header row
         file.close();
       }
     }
@@ -113,7 +113,8 @@ private:
       RCLCPP_ERROR(this->get_logger(), "Could not open file: %s", csv_file_path_.c_str());
       return;
     }
-    ofs << msg->row_step * msg->height << ", " << elapsed_compresion << ", " << size << "\n";
+    double stamp = rclcpp::Time(msg->header.stamp).seconds();
+    ofs<< std::fixed << std::setprecision(6) <<stamp << ", " << msg->width * msg->height << ", " << elapsed_compresion << ", " << size << "\n";
     ofs.close();
 
   }
