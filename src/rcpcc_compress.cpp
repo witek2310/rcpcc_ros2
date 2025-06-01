@@ -49,7 +49,7 @@ public:
     std::string folder_path;
     this->get_parameter("csv_folder_path", folder_path);
 
-    csv_file_path_ = folder_path + "/rcpcc_compress.csv";
+    csv_file_path_ = folder_path + "/compress_rcpcc.csv" +"_"+ std::to_string(q_level_);
 
     publisher_point_cloud_ = this->create_publisher<rcpcc::msg::CompressedPointCloud>("compressed_pointcloud_rcpcc", 10);
     

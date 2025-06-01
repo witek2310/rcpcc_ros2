@@ -45,7 +45,7 @@ public:
     std::string folder_path;
     this->get_parameter("csv_folder_path", folder_path);
 
-    csv_file_path_ = folder_path + "/rcpcc_decompress.csv";
+    csv_file_path_ = folder_path + "/decompress_rcpcc.csv";
 
     publisher_point_cloud_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/decompressed_pc", 10);
     
@@ -56,7 +56,7 @@ public:
       std::filesystem::create_directories(std::filesystem::path(csv_file_path_).parent_path()); 
       std::ofstream file(csv_file_path_);
       if (file.is_open()) {
-        file << "time_stamp, number_of_poionts, time_decompresion, size\n";  // Header row
+        file << "time_stamp, number_of_points, time_decompresion, size, q_level\n";  // Header row
         file.close();
       }
     }
@@ -113,7 +113,7 @@ private:
       return;
     }
     double stamp = rclcpp::Time(msg->header.stamp).seconds();
-    ofs << std::fixed << std::setprecision(6) << stamp << "," <<ros_pointcloud2_msg.width * ros_pointcloud2_msg.height << ", " << elapsed_decompresion << ", "<< size << "\n";
+    ofs << std::fixed << std::setprecision(6) << stamp << "," <<ros_pointcloud2_msg.width * ros_pointcloud2_msg.height << "," << elapsed_decompresion << ","<< size << "," << msg->qlevel << "\n";
     ofs.close();
   }
 
