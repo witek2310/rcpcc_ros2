@@ -37,24 +37,24 @@ def generate_launch_description():
         compression_mode_arg,
 
         # ros2 bag record process
-        ExecuteProcess(
-            cmd=[
-                'ros2', 'bag', 'record', '-o', LaunchConfiguration('bag_path'), '/rcpcc_decompressed',
-            ],
-            output='screen'
-        ),
+        # ExecuteProcess(
+        #     cmd=[
+        #         'ros2', 'bag', 'record', '-o', LaunchConfiguration('bag_path'), '/rcpcc_decompressed',
+        #     ],
+        #     output='screen'
+        # ),
 
         Node(
-            package='snnrmse',
-            executable='snnrmse',
-            name='snnrmse',
-            output='screen',
-            parameters=[
-                {'original_topic': LaunchConfiguration('point_cloud_topic')},
-                {'decompressed_topic': '/rcpcc_decompressed'},
-                {'output_folder': LaunchConfiguration("folder_path")}  # or any desired path
-            ]
-        ),
+            package='point_cloud_metrics',
+            executable='pointcloud_metrics_node',
+            name='pointcloud_metrics_node',
+            parameters=[{
+                'metrics_csv_path': LaunchConfiguration('folder_path'),
+                'cloud1_topic': LaunchConfiguration('point_cloud_topic'),              # Original pointcloud
+                'cloud2_topic': '/rcpcc_decompressed',         # Decompressed pointcloud
+            }],
+            output='screen'
+        )
 
         # rcpcc_compress node
         Node(

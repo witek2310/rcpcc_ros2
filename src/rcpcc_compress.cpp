@@ -37,7 +37,7 @@ class RCPCC : public rclcpp::Node
 {
 public:
   RCPCC()
-  : Node("minimal_publisher")
+  : Node("RCPCC")
   {
     this->declare_parameter<std::string>("csv_folder_path", "/tmp");
     this->declare_parameter<std::string>("pointcloud_topic", "/velodyne/velodyne_points");
@@ -67,7 +67,7 @@ public:
       std::filesystem::create_directories(std::filesystem::path(csv_file_path_).parent_path()); 
       std::ofstream file(csv_file_path_);
       if (file.is_open()) {
-        file << "time_stamp, points_number, compresion_time, size_after_compresion[B]\n";  // Header row
+        file << "points_number,point_cloud_size,compresion_time,size_after_compresion\n";  // Header row
         file.close();
       }
     }
@@ -81,8 +81,6 @@ private:
 
     auto start_compresion = std::chrono::steady_clock::now();
     std::vector<point_cloud> pcloud_data;
-
-    
 
     // convert pointCloud2 to pointCloud from pcl
     ros_pcl_2_rcppc_pcl(msg, pcloud_data);
@@ -103,8 +101,6 @@ private:
     msg_pub.data = std::vector<uint8_t>(encoded_data.begin(), encoded_data.end());
     msg_pub.qlevel = q_level_;
 
-
-
     publisher_point_cloud_->publish(msg_pub);
 
     std::ofstream ofs(csv_file_path_, std::ios_base::app);
@@ -113,8 +109,7 @@ private:
       RCLCPP_ERROR(this->get_logger(), "Could not open file: %s", csv_file_path_.c_str());
       return;
     }
-    double stamp = rclcpp::Time(msg->header.stamp).seconds();
-    ofs<< std::fixed << std::setprecision(6) <<stamp << ", " << msg->width * msg->height << ", " << elapsed_compresion << ", " << size << "\n";
+    ofs<< msg->width * msg->height << "," << msg->row_step * msg->height << ","<< elapsed_compresion << "," << size << "\n";
     ofs.close();
 
   }

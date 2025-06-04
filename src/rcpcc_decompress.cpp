@@ -39,15 +39,15 @@ class RCPCC : public rclcpp::Node
 {
 public:
   RCPCC()
-  : Node("minimal_publisher")
+  : Node("RCPCC")
   {
     this->declare_parameter<std::string>("csv_folder_path", "/tmp");
     std::string folder_path;
     this->get_parameter("csv_folder_path", folder_path);
 
-    csv_file_path_ = folder_path + "/decompress_rcpcc.csv";
+    csv_file_path_ = folder_path + "/decompress.csv";
 
-    publisher_point_cloud_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/decompressed_pc", 10);
+    publisher_point_cloud_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/rcpcc_decompressed", 10);
     
     subscriber_point_cloud_ = this->create_subscription<rcpcc::msg::CompressedPointCloud>(
       "compressed_pointcloud_rcpcc", 10, std::bind(&RCPCC::point_cloud_callback, this, std::placeholders::_1));
@@ -56,7 +56,7 @@ public:
       std::filesystem::create_directories(std::filesystem::path(csv_file_path_).parent_path()); 
       std::ofstream file(csv_file_path_);
       if (file.is_open()) {
-        file << "time_stamp, number_of_points, time_decompresion, size, q_level\n";  // Header row
+        file << "cloud_size,number_of_poionts,time_decompresion,compressed_size\n";  // Header row
         file.close();
       }
     }
@@ -112,8 +112,7 @@ private:
       RCLCPP_ERROR(this->get_logger(), "Could not open file: %s", csv_file_path_.c_str());
       return;
     }
-    double stamp = rclcpp::Time(msg->header.stamp).seconds();
-    ofs << std::fixed << std::setprecision(6) << stamp << "," <<ros_pointcloud2_msg.width * ros_pointcloud2_msg.height << "," << elapsed_decompresion << ","<< size << "," << msg->qlevel << "\n";
+  ofs << ros_pointcloud2_msg.row_step * ros_pointcloud2_msg.height << "," <<ros_pointcloud2_msg.width * ros_pointcloud2_msg.height<<","<< elapsed_decompresion << ","<< size << "\n";
     ofs.close();
   }
 
