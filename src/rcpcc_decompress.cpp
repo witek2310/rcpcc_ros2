@@ -42,12 +42,17 @@ public:
   : Node("RCPCC")
   {
     this->declare_parameter<std::string>("csv_folder_path", "/tmp");
+    this->declare_parameter<std::string>("output_topic", "/rcpcc_decompressed");
+    
     std::string folder_path;
     this->get_parameter("csv_folder_path", folder_path);
 
+    std::string output_topic;
+    this->get_parameter("output_topic", output_topic);
+
     csv_file_path_ = folder_path + "/decompress.csv";
 
-    publisher_point_cloud_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/rcpcc_decompressed", 10);
+    publisher_point_cloud_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(output_topic, 10);
     
     subscriber_point_cloud_ = this->create_subscription<rcpcc::msg::CompressedPointCloud>(
       "compressed_pointcloud_rcpcc", 10, std::bind(&RCPCC::point_cloud_callback, this, std::placeholders::_1));
